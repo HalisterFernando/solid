@@ -1,29 +1,33 @@
 // ReadingTracker.ts
 
-import progressNotification from './notifications';
+import EmailNotification from './EmailNotification';
+import Notificator from './Notificator';
+import PhoneNotification from './PhoneNotification';
 
-class ReadingTracker {
+export default class ReadingTracker {
   private readingGoal: number;
   private booksRead: number;
-  constructor(readingGoal: number) {
+  notificator: Notificator;
+  constructor(readingGoal: number, notificator: Notificator) {
     this.readingGoal = readingGoal;
     this.booksRead = 0;
+    this.notificator = notificator
   }
 
   trackReadings(readsCount: number): void {
     this.booksRead += readsCount;
     if (this.booksRead >= this.readingGoal) {
-      progressNotification(
+      this.notificator.sendNotification(
         'Congratulations! You\'ve reached your reading goal!',
       );
       return;
     }
-    progressNotification(
-      'There are still some books to go!',
-    );
+    this.notificator.sendNotification('There are still some books to go!');
   }
+  // Aqui viriam mais métodos, que fogem o escopo deste exercício
 }
 
-const readTracker = new ReadingTracker(20);
-readTracker.trackReadings(12);
-readTracker.trackReadings(9);
+const emailTrack = new ReadingTracker(9, new EmailNotification('halisterfernando@hotmail.com'))
+const phoneTrack = new ReadingTracker(9, new PhoneNotification(988590680))
+emailTrack.trackReadings(9)
+phoneTrack.trackReadings(8)
