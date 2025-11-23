@@ -1,8 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
 import HttpException from '../exceptions/HttpException';
+import PlantModel from '../models/PlantModel';
 
-interface IPlant {
+export interface IPlant {
   id: number,
   breed: string,
   needsSun: boolean,
@@ -13,38 +14,43 @@ interface IPlant {
 
 type INewPlant = Omit<IPlant, 'id' | 'waterFrequency'>;
 
-interface IPlantsMetadata {
+export interface IPlantsMetadata {
   lastPlantId: number
 }
 
+
 class PlantService {
-  private readonly plantsFile = path.join(__dirname, '..', 'models', 'database', 'plantsData.json');
+ 
+  constructor(private model = new PlantModel()) {
 
-  private readonly plantsMetadataFile = path.join(__dirname, '..', 'models', 'database', 'plantsMetadata.json');
-
-  private async getNextPlantId(incrementAmount = 1): Promise<number> {
-    const dataRaw = await fs.readFile(this.plantsMetadataFile, { encoding: 'utf8' });
-    const plantsMetadata: IPlantsMetadata = JSON.parse(dataRaw);
-    plantsMetadata.lastPlantId += incrementAmount;
-
-    await fs.writeFile(this.plantsMetadataFile, JSON.stringify(plantsMetadata, null, 2));
-
-    return plantsMetadata.lastPlantId;
   }
+  
 
   public async getAll(): Promise<IPlant[]> {
-    const dataRaw = await fs.readFile(this.plantsFile, { encoding: 'utf8' });
-    const plants: IPlant[] = JSON.parse(dataRaw);
-    return plants;
+    return this.model.getAll()
   }
 
   public async create(plant: INewPlant): Promise<IPlant> {
+    const validatedPlant = this.validatePlant(plant)
+    const waterFrequency = plant.needsSun
+    ? plant.size * 0.77 + (plant.origin === 'Brazil' ? 8 : 7)
+    : (plant.size / 2) * 1.33 + (plant.origin === 'Brazil' ? 8 : 7);
+
+    return this.model.create({...validatedPlant, waterFrequency})
+  
+  }
+
+  public async getById(id: string): Promise<IPlant | null> {
+    return this.model.getById(id)
+  }
+
+  validatePlant(plant: INewPlant): INewPlant {
     const {
       breed,
       needsSun,
       origin,
       size,
-    } = plant;
+    } = plant
 
     if (typeof breed !== 'string') {
       throw new HttpException(400, 'Attribute "breed" must be string.');
@@ -62,19 +68,7 @@ class PlantService {
       throw new HttpException(400, 'Attribute "size" must be number.');
     }
 
-    const waterFrequency = needsSun
-      ? size * 0.77 + (origin === 'Brazil' ? 8 : 7)
-      : (size / 2) * 1.33 + (origin === 'Brazil' ? 8 : 7);
-
-    const dataRaw = await fs.readFile(this.plantsFile, { encoding: 'utf8' });
-    const plants: IPlant[] = JSON.parse(dataRaw);
-
-    const newPlantId = await this.getNextPlantId(1);
-    const newPlant = { id: newPlantId, ...plant, waterFrequency };
-    plants.push(newPlant);
-
-    await fs.writeFile(this.plantsFile, JSON.stringify(plants, null, 2));
-    return newPlant;
+    return plant
   }
 }
 
