@@ -8,7 +8,7 @@ export default class PlantModel implements IModel<IPlant> {
     private readonly plantsMetadataFile = path.join(__dirname, '..', 'models', 'database', 'plantsMetadata.json');
 
     private async getNextPlantId(incrementAmount = 1): Promise<number> {
-        const dataRaw = await fs.readFile(this.plantsMetadataFile, { encoding: 'utf8' });
+        const dataRaw = await this.readFile(this.plantsMetadataFile);
         const plantsMetadata: IPlantsMetadata = JSON.parse(dataRaw);
         plantsMetadata.lastPlantId += incrementAmount;
     
@@ -18,45 +18,71 @@ export default class PlantModel implements IModel<IPlant> {
       }
 
     async getAll(): Promise<IPlant[]> {
-        const dataRaw = await fs.readFile(this.plantsFile, { encoding: 'utf8' });
+        const dataRaw = await this.readFile(this.plantsFile);
         const plants: IPlant[] = JSON.parse(dataRaw);
         return plants;
     }
     async getById(id: string): Promise<IPlant | null> {
-        const dataRaw = await fs.readFile(this.plantsFile, { encoding: 'utf8' });
+        const dataRaw = await this.readFile(this.plantsFile);
         const plants: IPlant[] = JSON.parse(dataRaw);
+        console.log(plants)
         const plant = plants.find((plant) => plant.id === Number(id))
 
         return plant ?? null
         
     }
-    async create(plant: Omit<IPlant, "id">): Promise<IPlant> {
-        const {
-            needsSun,
-            size,
-            origin
-        } = plant
-        
-        const waterFrequency = needsSun
-        ? size * 0.77 + (origin === 'Brazil' ? 8 : 7)
-        : (size / 2) * 1.33 + (origin === 'Brazil' ? 8 : 7);
+    async create(plant: Omit<IPlant, "id">): Promise<IPlant> {        
 
-        const dataRaw = await fs.readFile(this.plantsFile, { encoding: 'utf8' });
+        const dataRaw = await this.readFile(this.plantsFile);
         const plants: IPlant[] = JSON.parse(dataRaw);
     
         const newPlantId = await this.getNextPlantId(1);
-        const newPlant = { id: newPlantId, ...plant, waterFrequency };
+        const newPlant = { id: newPlantId, ...plant };
         plants.push(newPlant);
 
     
-        await fs.writeFile(this.plantsFile, JSON.stringify(plants, null, 2));
+        await this.writeFile(plants, this.plantsFile);
         return newPlant;
     }
-    update(arg: IPlant): Promise<IPlant> {
-        throw new Error("Method not implemented.");
+    async update(plant: IPlant): Promise<IPlant| null> {
+        const { id, breed, size, needsSun, origin, waterFrequency } = plant
+
+        const existingPlant = this.getById(id.toString())
+        if (!existingPlant) return null
+        
+        const dataRaw = await this.readFile(this.plantsFile);
+        const plants: IPlant[] = JSON.parse(dataRaw);
+
+        const updatedPlants = plants.map((plantObject) =>
+            plantObject.id === id ? {...plant, breed, size, needsSun, origin, waterFrequency } 
+            : plantObject
+        )
+
+        await this.writeFile(updatedPlants, this.plantsFile)
+
+        return plant
     }
-    removeById(id: string): Promise<boolean> {
-        throw new Error("Method not implemented.");
+    async removeById(id: string): Promise<boolean> {
+       const plantToBeRemoved = this.getById(id);
+       if (!plantToBeRemoved) return false
+
+       const dataRaw = await this.readFile(this.plantsFile);
+       const plants: IPlant[] = JSON.parse(dataRaw);
+       console.log('plants', plants)
+       const updatedPlants = plants.filter((plant) => plant.id !== Number(id))
+
+
+       await this.writeFile(updatedPlants, this.plantsFile)
+       return true
+    }
+
+    async readFile(file: string): Promise<string> {
+        const dataRaw = await fs.readFile(file, { encoding: 'utf8' });
+        return dataRaw
+    }
+
+    async writeFile(file: IPlant[],fileToBeUpdated: string): Promise<void> {
+        await fs.writeFile(fileToBeUpdated, JSON.stringify(file, null, 2));        
     }
 
 }

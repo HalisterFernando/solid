@@ -5,7 +5,7 @@ export interface IModelReader<T> {
 
   export interface IModelWriter<T> {
     create(arg: Omit<T, 'id'>): Promise<T>
-    update(arg: T): Promise<T>
+    update(arg: T): Promise<T | null>
   }
   export interface IModelDelete {
     removeById(id: string): Promise<boolean>

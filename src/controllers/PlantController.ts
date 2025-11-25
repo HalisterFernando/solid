@@ -21,6 +21,35 @@ class PlantController {
       next(error);
     }
   }
+
+  public async getById(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+      const { id } = req.params
+      const plant = await this.service.getById(id);
+      return res.status(201).json(plant);
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  public async update(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+      const plant = await this.service.update(req.body)
+      return res.status(201).json(plant)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  public async removeById(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+    const { id } = req.params
+    const plantToBeRemoved = await this.service.removeById(id)
+    return res.status(201).json(plantToBeRemoved)
+    } catch (error) {
+      next(error)
+    }
+  }
 }
 
 export default PlantController;

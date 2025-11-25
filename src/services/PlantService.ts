@@ -44,6 +44,14 @@ class PlantService {
     return this.model.getById(id)
   }
 
+  public async update(plant: IPlant): Promise<IPlant | null> {
+    return this.model.update(plant)
+  }
+
+  public async removeById(id: string): Promise<boolean> {
+    return this.model.removeById(id)
+  }
+
   validatePlant(plant: INewPlant): INewPlant {
     const {
       breed,
