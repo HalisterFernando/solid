@@ -8,3 +8,11 @@ export interface IVehicle {
     drive(): void;
     fly(): void;
   }
+
+export interface LandVehicle {
+    drive(): void
+}
+
+export interface AirVehicle {
+    fly(): void
+}
