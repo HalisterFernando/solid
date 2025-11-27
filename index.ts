@@ -1,8 +1,11 @@
 // ./index.ts
 import CepService from './CepService.ts';
+import { FooCepAPI } from './FooCepApi.ts';
+
+const cepApi = new FooCepAPI()
 
 async function main() {
-  const cepSvc = new CepService();
+  const cepSvc = new CepService(cepApi);
 
   console.log(
     'get address by cep', 
