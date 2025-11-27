@@ -1,6 +1,6 @@
 // ./index.ts
 import CepService from './CepService.ts';
-import { FooCepAPI } from './FooCepApi.ts';
+import FooCepAPI  from './FooCepApi.ts';
 
 const cepApi = new FooCepAPI()
 

@@ -1,10 +1,7 @@
 // ./FooCepAPI.ts
-interface IFooCepAPI {
-  getAddressByCEP(cep: string, number: number): Promise<string>
-  getCepByAddress(address: string, number: number): Promise<string>
-}
+import {IFooCepAPI} from './interfaces'
 
-export class FooCepAPI implements IFooCepAPI {
+class FooCepAPI implements IFooCepAPI {
     async getAddressByCEP(cep: string, number: number): Promise<string> {
       return `O endereço para o "CEP:${cep}, n°:${number}" é "endereço foo"`;
     }
@@ -14,4 +11,4 @@ export class FooCepAPI implements IFooCepAPI {
     }
   }
   
-  export default IFooCepAPI;
+  export default FooCepAPI;
