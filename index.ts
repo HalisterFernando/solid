@@ -1,5 +1,5 @@
 // ./index.ts
-import CepService from './CepService';
+import CepService from './CepService.ts';
 
 async function main() {
   const cepSvc = new CepService();

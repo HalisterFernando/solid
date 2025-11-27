@@ -1,5 +1,5 @@
 // ./CepService.ts
-import FooCepAPI from './FooCepApi';
+import FooCepAPI from './FooCepApi.ts';
 
 class CepService {
   private readonly cepApi: FooCepAPI;
