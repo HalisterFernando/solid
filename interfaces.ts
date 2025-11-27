@@ -4,15 +4,15 @@ export interface IFooCepAPI {
     getCepByAddress(address: string, number: number): Promise<string>
   }
 
-export interface IVehicle {
-    drive(): void;
-    fly(): void;
-  }
 
-export interface LandVehicle {
+export interface ICar {
     drive(): void
 }
 
-export interface AirVehicle {
+export interface IAirplane {
     fly(): void
+}
+
+export interface IVehicle extends ICar, IAirplane {
+  
 }
